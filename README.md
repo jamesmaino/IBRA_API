@@ -1,2 +1,2 @@
-# libraryofnature_R_nature
-An R based API server for spatial data of libraryofnature.com
+# IBRA API
+An R based API server for IBRA spatial data
