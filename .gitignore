@@ -1,3 +1,6 @@
+# EVC shapefile
+data/EVC/
+
 # History files
 .Rhistory
 .Rapp.history
