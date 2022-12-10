@@ -3,19 +3,24 @@ library(tidyverse)
 library(readxl) 
 library(raster)
 
-# evc <- st_read('data/EVC') %>% 
+# evc <- st_read('data/EVC/NV2005_EXTENT/') %>% 
 #   st_set_geometry(NULL)
 # names(evc)
 # write_csv(distinct(evc, EVC, X_EVCNAME), './data/EVC.csv')
 # write_csv(distinct(evc, EVC_STUDY, X_EVCSTUDY), './data/EVC_STUDY.csv')
 
-# xy = tibble(x=142.8, y=-37.217) %>%
-#   st_as_sf(coords=c('x','y'), crs=4326) %>%
-#   st_transform(st_crs(bioreg))
+xy = tibble(x=142.8, y=-37.217) %>%
+  st_as_sf(coords=c('x','y'), crs=4326) %>%
+  st_transform(st_crs(bioreg))
 
-evc_cons <- read_xlsx('./data/Bioregional-Conservation-Status-for-each-BioEVC.xlsx') %>% 
-  rename(EVC = 'EVC No.')
-evc_rast <- raster('./data/EVC.tif')
+
+evc_bcs <- read_xlsx('./data/EVC/EVC_BCS_codes.xlsx') %>% 
+  rename(EVC_BCS = Status_code)
+
+evc <- read_csv('./data/EVC/evc_remaining_extent.csv') %>% 
+  left_join(evc_bcs)
+
+evc_rast <- raster('./data/EVC/EVC.tif')
 
 bioreg <- st_read("data/VBIOREG100/VBIOREG100.shp")
 
@@ -23,10 +28,10 @@ bioreg <- st_read("data/VBIOREG100/VBIOREG100.shp")
 # get IBRA code
 sf_use_s2(FALSE)
 
-shp <- st_read("data/IBRA7_regions/ibra7_regions.shp")
+shp <- st_read("data/IBRA/IBRA7_regions/ibra7_regions.shp")
 
 # load ibra description
-ibra <- read_xlsx('./data/IBRA_2000_summary_report_5.1.xlsx') 
+ibra <- read_xlsx('./data/IBRA/IBRA_2000_summary_report_5.1.xlsx') 
 
 # load capad data
 capad <- read_xlsx('./data/CAPAD2020/capad2020-terrestrial-national.xlsx', 
@@ -49,14 +54,14 @@ function(lon, lat) {
     st_set_geometry(NULL) %>% 
     left_join(capad)
   
-  out['IBRAName'] <- feat$REG_NAME_7 
-  out['CAPADpercent'] <- feat$`% IBRA Region Protected`
+  out['IBRA_name'] <- feat$REG_NAME_7 
+  out['CAPAD_IBRA_percent'] <- feat$`% IBRA Region Protected`
   
   desc <- ibra %>% 
     filter(REG_CODE_7 == feat$REG_CODE_7) %>% 
     pull(DESCRIPTION)
 
-  out['IBRADesc'] <- desc 
+  out['IBRA_desc'] <- desc 
 
   b <- bioreg[xy, ] %>% 
     pull(BIOREGION)
@@ -64,14 +69,15 @@ function(lon, lat) {
 
   e <- extract(evc_rast, xy)
 
-  feat2 <- evc_cons %>% 
-    filter(Bioregion == b) %>% 
+  feat2 <- evc %>% 
+    filter(BIOREGION == b) %>% 
     filter(EVC == e)
   if(nrow(feat2) == 0) feat2 <- feat2 %>% add_row()
 
-  out['Bioregion'] <- feat2$Bioregion
-  out['EVC'] <- feat2$`EVC Name`
-  out['BCS'] <- feat2$BCS
+  out['bioregion'] <- feat2$BIOREGION
+  out['EVC'] <- feat2$X_EVCNAME
+  out['BCS'] <- feat2$Status
+  out['EVC_percent'] <- feat2$proportion_remaining * 100
 
   return(out)
 }

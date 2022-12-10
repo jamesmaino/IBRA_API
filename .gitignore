@@ -1,5 +1,5 @@
 # EVC shapefile
-data/EVC/
+data/EVC_raw_spatial_data/
 
 # History files
 .Rhistory
