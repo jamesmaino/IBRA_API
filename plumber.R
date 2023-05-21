@@ -9,9 +9,9 @@ library(raster)
 # write_csv(distinct(evc, EVC, X_EVCNAME), './data/EVC.csv')
 # write_csv(distinct(evc, EVC_STUDY, X_EVCSTUDY), './data/EVC_STUDY.csv')
 
-xy = tibble(x=142.8, y=-37.217) %>%
-  st_as_sf(coords=c('x','y'), crs=4326) %>%
-  st_transform(st_crs(bioreg))
+# xy = tibble(x=142.8, y=-37.217) %>%
+#   st_as_sf(coords=c('x','y'), crs=4326) %>%
+#   st_transform(st_crs(bioreg))
 
 
 evc_bcs <- read_xlsx('./data/EVC/EVC_BCS_codes.xlsx') %>% 
