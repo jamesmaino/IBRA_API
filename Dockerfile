@@ -1,4 +1,4 @@
-FROM rstudio/plumber
+FROM rocker/geospatial
 
 WORKDIR /home
 
@@ -12,6 +12,6 @@ EXPOSE 8080
 # library(raster)
 # library(rgdal)
 
-RUN R -e "install.packages(c('sf','tidyverse','readxl','rgdal','raster'),dependencies=TRUE, repos='http://cran.rstudio.com/')"
+RUN R -e "install.packages(c('plumber'),dependencies=TRUE, repos='http://cran.rstudio.com/')"
 
 ENTRYPOINT ["Rscript", "run_plumber.R"]
